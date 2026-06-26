@@ -138,7 +138,13 @@ class MemoryStore:
         conn = sqlite3.connect(self.db_path)
         conn.executescript(SCHEMA)
 
-        files = sorted(self.knowledge_dir.glob("*.md"))
+        files = sorted(
+            f for f in self.knowledge_dir.rglob("*.md")
+            if not any(
+                part.startswith(".")
+                for part in f.relative_to(self.knowledge_dir).parts[:-1]
+            )
+        )
         t0 = time.perf_counter()
         parsed = [self._parse_file(f) for f in files]
         manifest = {}

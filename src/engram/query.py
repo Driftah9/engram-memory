@@ -59,14 +59,15 @@ def section_query(
     exclude_ids: Optional[List[str]] = None,
     limit: int = 20,
 ) -> List[Dict]:
-    """Find sections whose content or heading contains a term.
+    """Find sections containing all tokens from a term.
 
-    Excludes index/schema nodes (MEMORY, SCHEMA) by default so results are
-    always real content nodes, not metadata.
+    Normalizes hyphens to spaces before tokenizing, so "multi-user" and
+    "multi user" both find sections containing both words regardless of
+    how they're joined in the source.
 
     Args:
         conn: SQLite connection with memory_sections and memory_index tables
-        term: Search term (substring match, case-insensitive)
+        term: Search term — split on whitespace, each token must match
         exclude_ids: Node IDs to exclude (default: ['MEMORY', 'SCHEMA'])
         limit: Maximum number of results to return
 
@@ -75,11 +76,20 @@ def section_query(
 
     Examples:
         >>> sections = section_query(conn, "SSDI")
+        >>> sections = section_query(conn, "multi-user")        # finds "multi user" too
         >>> sections = section_query(conn, "priority partners", exclude_ids=["MEMORY"])
     """
     exclude = exclude_ids or ["MEMORY", "SCHEMA"]
     placeholders = ",".join("?" * len(exclude))
-    like = f"%{term}%"
+
+    tokens = term.replace("-", " ").split()
+    if not tokens:
+        return []
+
+    token_clauses = " AND ".join(
+        "(ms.content LIKE ? OR ms.heading LIKE ?)" for _ in tokens
+    )
+    token_params = [p for tok in tokens for p in (f"%{tok}%", f"%{tok}%")]
 
     rows = conn.execute(
         f"""
@@ -88,11 +98,11 @@ def section_query(
         FROM memory_sections ms
         JOIN memory_index mi ON ms.node_id = mi.id
         WHERE ms.node_id NOT IN ({placeholders})
-          AND (ms.content LIKE ? OR ms.heading LIKE ?)
+          AND {token_clauses}
         ORDER BY mi.type, mi.id
         LIMIT ?
         """,
-        (*exclude, like, like, limit),
+        (*exclude, *token_params, limit),
     ).fetchall()
 
     return [dict(r) for r in rows]
