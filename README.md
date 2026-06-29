@@ -49,10 +49,10 @@ pip install engram-agent-memory
 Or install from source:
 
 ```bash
-pip install git+https://github.com/Driftah9/engram-memory.git
+pip install git+https://github.com/Driftah9/engram-agent-memory.git
 # or, editable:
-git clone https://github.com/Driftah9/engram-memory.git
-cd engram-memory && pip install -e .
+git clone https://github.com/Driftah9/engram-agent-memory.git
+cd engram-agent-memory && pip install -e .
 ```
 
 Pure standard library — no runtime dependencies. Import with `from engram import ...`.

@@ -39,10 +39,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/Driftah9/engram-memory"
-Documentation = "https://github.com/Driftah9/engram-memory#readme"
-Repository = "https://github.com/Driftah9/engram-memory.git"
-Issues = "https://github.com/Driftah9/engram-memory/issues"
+Homepage = "https://github.com/Driftah9/engram-agent-memory"
+Documentation = "https://github.com/Driftah9/engram-agent-memory#readme"
+Repository = "https://github.com/Driftah9/engram-agent-memory.git"
+Issues = "https://github.com/Driftah9/engram-agent-memory/issues"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
