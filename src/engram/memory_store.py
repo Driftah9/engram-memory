@@ -66,6 +66,16 @@ class MemoryStore:
             sa_block = fm_block[fm_block.find("see_also") :]
             relations = re.findall(r"- ([\w-]+)", sa_block)
 
+        # Inline wiki-links realize the MOC/galaxy graph: every [[node-name]] in the
+        # body becomes a relation edge (merged with see_also, deduped, no self-links).
+        _node_id = meta.get("name", path.stem)
+        _seen = set(relations)
+        for _ln in re.findall(r"\[\[([\w/-]+)", body):
+            _ln = _ln.split("|")[0].strip()
+            if _ln and _ln != _node_id and _ln not in _seen:
+                relations.append(_ln)
+                _seen.add(_ln)
+
         sd = re.search(r"session_date:\s+(.+)", fm_block)
 
         return {
@@ -282,7 +292,8 @@ class MemoryStore:
             conn.close()
 
     def relations_from(self, node_id: str) -> List[str]:
-        """Get all nodes that a node links to.
+        """Get all nodes that a node links to, via `see_also` frontmatter AND inline
+        `[[wiki-links]]` in the body.
 
         Args:
             node_id: Node ID to find relations for
@@ -299,6 +310,15 @@ class MemoryStore:
             return [r["to_id"] for r in rows]
         finally:
             conn.close()
+
+    def smart_recall(self, query: str, k: int = 4) -> List[Dict]:
+        """NL-robust recall: keyword OR-match + best section, with line pointers.
+
+        Use this for natural-language prompts where `query()` (implicit-AND FTS) would
+        match nothing. Returns up to k dicts: {text, source, score}.
+        """
+        from .recall import smart_recall as _smart_recall
+        return _smart_recall(self, query, k=k)
 
     @staticmethod
     def read_lines(file_path: str, start: int, end: int) -> str:

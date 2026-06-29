@@ -56,7 +56,7 @@ More content...
 - Must be hyphenated lowercase
 
 **type**
-- `user` — identity, preferences, constraints (e.g., SSDI status, location)
+- `user` — identity, preferences, constraints (e.g., dietary preferences, location)
 - `feedback` — learned rules and behavioral patterns (e.g., communication style)
 - `project` — ongoing work, context, decisions (e.g., current initiatives)
 - `reference` — external sources and patterns (e.g., research findings)
@@ -70,8 +70,9 @@ More content...
 - Each section has line range for targeted reads
 - Avoid section nesting (H3+ are treated as content)
 
-**relations** (see_also)
-- Links to other knowledge nodes by ID
+**relations** (`see_also` + inline `[[wiki-links]]`)
+- Links to other knowledge nodes by ID, from `see_also` frontmatter and from any
+  `[[node-name]]` written in the body (the MOC/graph layer)
 - Bidirectional semantically (if A links to B, B is related to A)
 - Stored in memory_relations junction table
 
@@ -99,13 +100,13 @@ More content...
 
 **Keyword search (FTS5)**
 ```python
-results = store.query("SSDI", type_filter="user")
+results = store.query("budget", type_filter="user")
 # Returns nodes with FTS5 ranking
 ```
 
 **Section search**
 ```python
-sections = store.section_query("priority partners")
+sections = store.section_query("renewal date")
 # Returns sections whose content matches
 ```
 
@@ -124,7 +125,7 @@ related = store.relations_from("fix-live-not-nexus")
 **Manifest fallback**
 ```python
 # If DB is unavailable:
-results = store.manifest_query("SSDI")
+results = store.manifest_query("budget")
 # Query works via JSON index
 ```
 

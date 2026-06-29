@@ -66,7 +66,7 @@ List of dicts with keys:
 **Example:**
 ```python
 # Search across all types
-results = store.query("SSDI")
+results = store.query("budget")
 
 # Search within a specific type
 feedback = store.query("communication", type_filter="feedback")
@@ -105,8 +105,8 @@ List of dicts with keys:
 
 **Example:**
 ```python
-# Find sections about priority partners
-sections = store.section_query("priority partners")
+# Find sections about renewal date
+sections = store.section_query("renewal date")
 
 # Read the section content
 if sections:
@@ -115,14 +115,38 @@ if sections:
     print(f"{s['heading']}: {content}")
 
 # Exclude additional nodes
-sections = store.section_query("SSDI", exclude_ids=["MEMORY", "SCHEMA", "other-index"])
+sections = store.section_query("budget", exclude_ids=["MEMORY", "SCHEMA", "other-index"])
+```
+
+---
+
+### `smart_recall(query, k=4) → List[Dict]`
+
+Natural-language-robust recall. Unlike `query()` (which AND-matches every token via
+FTS), this strips stopwords, OR-matches the keywords, and returns the best-matching
+**section** per node with exact line pointers — so a long prompt still retrieves
+something useful.
+
+**Arguments:**
+- `query` (str): A natural-language question or phrase
+- `k` (int): Maximum hits (default: 4)
+
+**Returns:**
+List of dicts with keys `text`, `source` (`engram:<file>:<start>-<end>`), `score`.
+
+**Example:**
+```python
+hits = store.smart_recall("how is the manifest fallback supposed to work")
+for h in hits:
+    print(h["source"], "→", h["text"][:80])
 ```
 
 ---
 
 ### `relations_from(node_id) → List[str]`
 
-Get all nodes that a node links to via `see_also` relations.
+Get all nodes that a node links to — via `see_also` frontmatter **and** inline
+`[[wiki-links]]` in the body.
 
 **Arguments:**
 - `node_id` (str): Node identifier
@@ -179,9 +203,9 @@ List of matching nodes from the manifest JSON
 ```python
 # If the database is down, fall back to manifest
 try:
-    results = store.query("SSDI")
+    results = store.query("budget")
 except Exception:
-    results = store.manifest_query("SSDI")
+    results = store.manifest_query("budget")
     print("Using manifest fallback")
 ```
 
@@ -218,7 +242,7 @@ Import from `engram.query`:
 ```python
 from engram import fts_query
 
-results = fts_query(conn, "SSDI", type_filter="user")
+results = fts_query(conn, "budget", type_filter="user")
 ```
 
 ---
@@ -231,7 +255,7 @@ Import from `engram.query`:
 ```python
 from engram import section_query
 
-sections = section_query(conn, "priority partners")
+sections = section_query(conn, "renewal date")
 ```
 
 ---
