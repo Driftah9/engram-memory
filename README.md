@@ -39,9 +39,20 @@ Your markdown files
 
 ### Install
 
+Install from source (the `engram-memory` name on PyPI is an unrelated project):
+
 ```bash
-pip install engram-memory
+pip install git+https://github.com/Driftah9/engram-memory.git
 ```
+
+Or clone and install editable:
+
+```bash
+git clone https://github.com/Driftah9/engram-memory.git
+cd engram-memory && pip install -e .
+```
+
+Pure standard library — no runtime dependencies.
 
 ### Create a knowledge file
 
@@ -81,6 +92,11 @@ content = store.read_lines(results[0]["file_path"],
                            results[0]["line_start"],
                            results[0]["line_end"])
 # → "Budget is limited. Always flag costs upfront."
+
+# Or ask in plain language — smart_recall handles full sentences
+hits = store.smart_recall("what's the user's spending situation?")
+# → [{'text': '[user-profile > Constraints] Budget is limited...',
+#     'source': 'engram:user_profile.md:12-14', 'score': 0.9}]
 ```
 
 ---
@@ -108,11 +124,14 @@ Find relevant knowledge in under a millisecond. Works even across hundreds of fi
 **Precise retrieval**
 Results include the exact file and line numbers where the answer lives — not the whole document. Your agent loads only what it needs.
 
+**Natural-language recall**
+`smart_recall()` takes a full sentence, strips the noise words, and returns the best-matching *section* with its line pointers — so plain-language questions work, not just keyword lookups.
+
 **Crash-proof fallback**
 If the search index fails, a backup JSON index takes over with no code changes required. Your knowledge is never lost.
 
-**Relations between topics**
-Link knowledge files together. If "communication-style" relates to "user-profile", your agent can follow that connection automatically.
+**Relations between topics (MOC graph)**
+Link knowledge files together — either with `see_also` in the header or by writing `[[node-name]]` inline in the body. Your agent can follow those connections automatically, turning your notes into a navigable map of content.
 
 **No external services**
 Runs entirely on your machine. No APIs, no cloud services, no vendor lock-in. Just Python and a SQLite file.

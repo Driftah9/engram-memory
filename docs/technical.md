@@ -51,6 +51,10 @@ Both formats are parsed identically. `metadata.type` takes precedence over top-l
 | `session_date` | No | ISO date string (`YYYY-MM-DD`). When this knowledge was written. |
 | `see_also` | No | List of node IDs this node relates to. Stored in `memory_relations`. |
 
+In addition to `see_also`, any inline `[[node-name]]` written in the **body** is parsed
+into a relation edge (merged with `see_also`, deduped, self-links dropped) — so you can
+build the relation graph as you write, without maintaining frontmatter lists.
+
 ### Sections
 
 H2 headings (`## Heading`) divide a file into sections. Each section is:
